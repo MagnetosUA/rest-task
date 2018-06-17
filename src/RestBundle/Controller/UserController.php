@@ -59,9 +59,12 @@ class UserController extends FOSRestController
      */
     public function updateAction($id, Request $request)
     {
-        $data = new User;
-        $name = $request->get('name');
-        $role = $request->get('login');
+        $data = $request->getContent();
+        $data = json_decode($data);
+
+        $login = $data->login;
+        $name = $data->name;
+
         $sn = $this->getDoctrine()->getManager();
         $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
         if (empty($user)) {
@@ -73,17 +76,18 @@ class UserController extends FOSRestController
             $sn->flush();
             return new View("User Updated Successfully", Response::HTTP_OK);
         }
+
         elseif(empty($name) && !empty($login)){
             $user->setLogin($login);
             $sn->flush();
-            return new View("role Updated Successfully", Response::HTTP_OK);
+            return new View("login Updated Successfully", Response::HTTP_OK);
         }
         elseif(!empty($name) && empty($role)){
             $user->setName($name);
             $sn->flush();
             return new View("User Name Updated Successfully", Response::HTTP_OK);
         }
-        else return new View("User name or role cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
+        else return new View("User name or login cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
     }
 
     /**
