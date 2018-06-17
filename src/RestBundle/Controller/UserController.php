@@ -132,6 +132,14 @@ class UserController extends FOSRestController
         if ($users === null) {
             return new View("there are no users exist", Response::HTTP_NOT_FOUND);
         }
-        return $users;
+
+
+        $usersId = [];
+        foreach ($users as $user) {
+            $usersId[] = $user->getUserId();
+        }
+
+        $uniqueUsers = array_unique($usersId);
+        return $uniqueUsers;
     }
 }
