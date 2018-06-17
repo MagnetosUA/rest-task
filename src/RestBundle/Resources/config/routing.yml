@@ -1,3 +1,0 @@
-rest_homepage:
-    path:     /user
-    defaults: { _controller: RestBundle:User:get }

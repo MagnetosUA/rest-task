@@ -1,4 +1,6 @@
 rest:
-    resource: "@RestBundle/Resources/config/routing.yml"
-    prefix:   /
+    resource: "@RestBundle/Controller/UserController.php"
+    type: annotation
+
+
 
