@@ -15,14 +15,6 @@ use Symfony\Component\Validator\Constraints\Date;
 
 class UserController extends FOSRestController
 {
-//    /**
-//     * @Rest\Get("/")
-//     */
-//    public function indexAction()
-//    {
-//        return $this->render('@Rest/Default/index.html.twig');
-//    }
-
     /**
      * @Rest\Get("/user")
      */
@@ -125,5 +117,21 @@ class UserController extends FOSRestController
         $success = $em->flush();
 
         return new View("registered user successfully", Response::HTTP_OK);
+    }
+
+    /**
+     * @Rest\Get("/users/{from}/{to}")
+     */
+    public function getUniqueUserByDate($from, $to)
+    {
+        $dateInterval["from"] = $from;
+        $dateInterval["to"] = $to;
+
+        $users = $this->getDoctrine()->getRepository('RestBundle:UserVisit')->getUniqueUsersByDateInterval($dateInterval);
+
+        if ($users === null) {
+            return new View("there are no users exist", Response::HTTP_NOT_FOUND);
+        }
+        return $users;
     }
 }

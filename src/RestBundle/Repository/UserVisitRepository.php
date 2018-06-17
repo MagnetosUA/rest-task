@@ -10,4 +10,15 @@ namespace RestBundle\Repository;
  */
 class UserVisitRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getUniqueUsersByDateInterval($dateInterval)
+    {
+        $query = $this->createQueryBuilder('u')
+            ->where('u.visitDate >= :dateFrom')
+            ->andWhere('u.visitDate <= :dateTo')
+            ->setParameter('dateFrom', $dateInterval['from'])
+            ->setParameter('dateTo', $dateInterval["to"])
+            ->getQuery();
+
+        return $query->getResult();
+    }
 }
