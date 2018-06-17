@@ -22,7 +22,7 @@ class UserController extends FOSRestController
 //    }
 
     /**
-     * @Rest\Get("/get-user")
+     * @Rest\Get("/user")
      */
     public function getAction()
     {
@@ -34,7 +34,7 @@ class UserController extends FOSRestController
     }
 
     /**
-     * @Rest\Post("/post-user/")
+     * @Rest\Post("/user/")
      */
     public function postAction(Request $request)
     {
@@ -54,4 +54,35 @@ class UserController extends FOSRestController
         return new View("User Added Successfully", Response::HTTP_OK);
     }
 
+    /**
+     * @Rest\Put("/user/{id}")
+     */
+    public function updateAction($id, Request $request)
+    {
+        $data = new User;
+        $name = $request->get('name');
+        $role = $request->get('login');
+        $sn = $this->getDoctrine()->getManager();
+        $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
+        if (empty($user)) {
+            return new View("user not found", Response::HTTP_NOT_FOUND);
+        }
+        elseif(!empty($name) && !empty($login)){
+            $user->setName($name);
+            $user->setLogin($login);
+            $sn->flush();
+            return new View("User Updated Successfully", Response::HTTP_OK);
+        }
+        elseif(empty($name) && !empty($login)){
+            $user->setLogin($login);
+            $sn->flush();
+            return new View("role Updated Successfully", Response::HTTP_OK);
+        }
+        elseif(!empty($name) && empty($role)){
+            $user->setName($name);
+            $sn->flush();
+            return new View("User Name Updated Successfully", Response::HTTP_OK);
+        }
+        else return new View("User name or role cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
+    }
 }
