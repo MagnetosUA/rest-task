@@ -29,7 +29,6 @@ class UserVisit
     private $userId;
 
     /**
-     * @var \Date
      *
      * @ORM\Column(name="visitDate", type="date")
      */

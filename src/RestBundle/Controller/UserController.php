@@ -2,6 +2,7 @@
 
 namespace RestBundle\Controller;
 
+use RestBundle\Entity\UserVisit;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -10,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\View\View;
 use RestBundle\Entity\User;
+use Symfony\Component\Validator\Constraints\Date;
 
 class UserController extends FOSRestController
 {
@@ -65,7 +67,7 @@ class UserController extends FOSRestController
         $login = $data->login;
         $name = $data->name;
 
-        $sn = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
         $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
         if (empty($user)) {
             return new View("user not found", Response::HTTP_NOT_FOUND);
@@ -73,18 +75,18 @@ class UserController extends FOSRestController
         elseif(!empty($name) && !empty($login)){
             $user->setName($name);
             $user->setLogin($login);
-            $sn->flush();
+            $em->flush();
             return new View("User Updated Successfully", Response::HTTP_OK);
         }
 
         elseif(empty($name) && !empty($login)){
             $user->setLogin($login);
-            $sn->flush();
+            $em->flush();
             return new View("login Updated Successfully", Response::HTTP_OK);
         }
         elseif(!empty($name) && empty($role)){
             $user->setName($name);
-            $sn->flush();
+            $em->flush();
             return new View("User Name Updated Successfully", Response::HTTP_OK);
         }
         else return new View("User name or login cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
@@ -95,16 +97,33 @@ class UserController extends FOSRestController
      */
     public function deleteAction($id)
     {
-        $data = new User;
-        $sn = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
         $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
         if (empty($user)) {
             return new View("user not found", Response::HTTP_NOT_FOUND);
         }
         else {
-            $sn->remove($user);
-            $sn->flush();
+            $em->remove($user);
+            $em->flush();
         }
         return new View("deleted successfully", Response::HTTP_OK);
+    }
+
+    /**
+     * @Rest\Post("/visit-user/")
+     */
+    public function registerVisitUser(Request $request)
+    {
+        $userVisit = new UserVisit();
+        $em = $this->getDoctrine()->getManager();
+
+        $userId = $request->get('userId');
+        $userVisit->setUserId($userId);
+        $userVisit->setVisitDate(new \DateTime);
+
+        $em->persist($userVisit);
+        $success = $em->flush();
+
+        return new View("registered user successfully", Response::HTTP_OK);
     }
 }
