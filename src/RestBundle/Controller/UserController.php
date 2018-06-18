@@ -167,7 +167,7 @@ class UserController extends FOSRestController
         $em = $this->getDoctrine()->getManager();
         $userId = $request->get('userId');
         $userVisit->setUserId($userId);
-        $userVisit->setVisitDate(new \DateTime);
+        $userVisit->setVisitDate();
         $em->persist($userVisit);
         $em->flush();
 

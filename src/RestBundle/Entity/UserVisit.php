@@ -76,9 +76,9 @@ class UserVisit
      *
      * @return UserVisit
      */
-    public function setVisitDate($visitDate)
+    public function setVisitDate()
     {
-        $this->visitDate = $visitDate;
+        $this->visitDate = new \DateTime;
 
         return $this;
     }
