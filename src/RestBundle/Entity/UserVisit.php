@@ -25,6 +25,9 @@ class UserVisit
      * @var int
      *
      * @ORM\Column(name="userId", type="integer")
+     *
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     private $userId;
 
