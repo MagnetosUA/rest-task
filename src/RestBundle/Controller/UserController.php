@@ -3,19 +3,31 @@
 namespace RestBundle\Controller;
 
 use RestBundle\Entity\UserVisit;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\View\View;
 use RestBundle\Entity\User;
-use Symfony\Component\Validator\Constraints\Date;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+
 
 class UserController extends FOSRestController
 {
     /**
+     * This is the method for getting users from database
+     *
+     * @ApiDoc(
+     *  description="Get users",
+     *  parameters={
+     *      {"name"="name", "dataType"="string", "format" = "json", "required"=true, "description"="user name"},
+     *      {"name"="login", "dataType"="string", "format" = "json", "required"=true, "description"="user login"},
+     *  },
+     * statusCodes={
+     *         200="Returned when successful",
+     *         404="Returned when the users is not found"
+     *     }
+     * )
      * @Rest\Get("/user")
      */
     public function getAction()
@@ -28,6 +40,17 @@ class UserController extends FOSRestController
     }
 
     /**
+     * @ApiDoc(
+     *  description="Create a new User",
+     *  parameters={
+     *      {"name"="name", "dataType"="string", "format" = "json", "required"=true, "description"="user name"},
+     *      {"name"="login", "dataType"="string", "format" = "json", "required"=true, "description"="user login"},
+     *  },
+     * statusCodes={
+     *         200="Returned when user added successfully",
+     *         406="Returned when NULL values"
+     *     }
+     * )
      * @Rest\Post("/user/")
      */
     public function postAction(Request $request)
@@ -49,16 +72,27 @@ class UserController extends FOSRestController
     }
 
     /**
+     * @ApiDoc(
+     *  description="Update User",
+     *  parameters={
+     *      {"name"="name", "dataType"="string", "format" = "json", "required"=true, "description"="user name"},
+     *      {"name"="login", "dataType"="string", "format" = "json", "required"=true, "description"="user login"},
+     *  },
+     * statusCodes={
+     *         200="Returned when user updated successfully",
+     *         404="Returned when user is not found",
+     *         406="Returned when NULL values",
+     *     }
+     * )
+     *
      * @Rest\Put("/user/{id}")
      */
     public function updateAction($id, Request $request)
     {
         $data = $request->getContent();
         $data = json_decode($data);
-
         $login = $data->login;
         $name = $data->name;
-
         $em = $this->getDoctrine()->getManager();
         $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
         if (empty($user)) {
@@ -70,7 +104,6 @@ class UserController extends FOSRestController
             $em->flush();
             return new View("User Updated Successfully", Response::HTTP_OK);
         }
-
         elseif(empty($name) && !empty($login)){
             $user->setLogin($login);
             $em->flush();
@@ -85,6 +118,18 @@ class UserController extends FOSRestController
     }
 
     /**
+     *
+     * * @ApiDoc(
+     *  description="Delete User",
+     *  parameters={
+     *      {"name"="id", "dataType"="integer", "required"=true, "description"="user id"},
+     *  },
+     * statusCodes={
+     *         200="Returned when user deleted successfully",
+     *         404="Returned when user is not found"
+     *     }
+     * )
+     *
      * @Rest\Delete("/user/{id}")
      */
     public function deleteAction($id)
@@ -98,48 +143,67 @@ class UserController extends FOSRestController
             $em->remove($user);
             $em->flush();
         }
+
         return new View("deleted successfully", Response::HTTP_OK);
     }
 
     /**
+     * @ApiDoc(
+     *  description="Register User's visiting",
+     *  parameters={
+     *      {"name"="id", "dataType"="integer", "required"=true, "description"="user id"},
+     *      {"name"="date", "dataType"="date", "required"=true, "description"="visit data"},
+     *  },
+     * statusCodes={
+     *         200="Returned when successfully"
+     *     }
+     * )
+     *
      * @Rest\Post("/visit-user/")
      */
     public function registerVisitUser(Request $request)
     {
         $userVisit = new UserVisit();
         $em = $this->getDoctrine()->getManager();
-
         $userId = $request->get('userId');
         $userVisit->setUserId($userId);
         $userVisit->setVisitDate(new \DateTime);
-
         $em->persist($userVisit);
-        $success = $em->flush();
+        $em->flush();
 
         return new View("registered user successfully", Response::HTTP_OK);
     }
 
     /**
+     * @ApiDoc(
+     *  description="Get unique users by date interval",
+     *
+     * requirements={
+     *      {"name"="from", "dataType"="date", "required"=true, "description"="visit data from"},
+     *      {"name"="to", "dataType"="date", "required"=true, "description"="visit data to"},
+     *  },
+     * statusCodes={
+     *         404="Returned when user is not found",
+     *     }
+     * )
+     *
      * @Rest\Get("/users/{from}/{to}")
      */
     public function getUniqueUserByDate($from, $to)
     {
         $dateInterval["from"] = $from;
         $dateInterval["to"] = $to;
-
         $users = $this->getDoctrine()->getRepository('RestBundle:UserVisit')->getUniqueUsersByDateInterval($dateInterval);
-
         if ($users === null) {
             return new View("there are no users exist", Response::HTTP_NOT_FOUND);
         }
-
-
         $usersId = [];
         foreach ($users as $user) {
             $usersId[] = $user->getUserId();
         }
-
         $uniqueUsers = array_unique($usersId);
+
         return $uniqueUsers;
     }
 }
+
