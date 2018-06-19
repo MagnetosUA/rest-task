@@ -61,7 +61,6 @@ class UserController extends FOSRestController
         $form = $this->createForm(UserType::class);
         $form->submit($data);
 
-        echo $form->getErrors();
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
             $em = $this->getDoctrine()->getManager();
@@ -89,52 +88,22 @@ class UserController extends FOSRestController
      */
     public function updateAction($id, Request $request)
     {
-        $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
-        $form = $this->createForm(UserType::class, $user);
-
-        $data = $request->getContent();
-        $data = json_decode($data);
-
-        $login = $data->login;
-        $name = $data->name;
-        $em = $this->getDoctrine()->getManager();
-        $user->setName($name);
-        $user->setLogin($login);
-        $em->flush();
-
-        $form->setData($user);
-
-        $form->handleRequest($request);
-        $fd = $form->getData();
-        var_dump($fd);
-        exit;
-
-        $data = $request->getContent();
-        $data = json_decode($data);
-        $login = $data->login;
-        $name = $data->name;
-        $em = $this->getDoctrine()->getManager();
+        $data = json_decode($request->getContent(), true);
+        $form = $this->createForm(UserType::class);
+        $form->submit($data);
         $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
         if (empty($user)) {
             return new View("user not found", Response::HTTP_NOT_FOUND);
         }
-        elseif(!empty($name) && !empty($login)){
-            $user->setName($name);
-            $user->setLogin($login);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $updatedUser = $form->getData();
+            $user->setName($updatedUser->getName());
+            $user->setLogin($updatedUser->getLogin());
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
             $em->flush();
             return $user;
         }
-        elseif(empty($name) && !empty($login)){
-            $user->setLogin($login);
-            $em->flush();
-            return new View("login Updated Successfully", Response::HTTP_OK);
-        }
-        elseif(!empty($name) && empty($role)){
-            $user->setName($name);
-            $em->flush();
-            return new View("User Name Updated Successfully", Response::HTTP_OK);
-        }
-        else return new View("User name or login cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
     }
 
     /**
