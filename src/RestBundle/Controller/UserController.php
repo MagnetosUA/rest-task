@@ -2,6 +2,7 @@
 
 namespace RestBundle\Controller;
 
+use function PHPSTORM_META\type;
 use RestBundle\Entity\UserVisit;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
@@ -165,8 +166,11 @@ class UserController extends FOSRestController
     {
         $userVisit = new UserVisit();
         $em = $this->getDoctrine()->getManager();
-        $userId = $request->get('userId');
-        $userVisit->setUserId($userId);
+
+        $login = $request->get('login');
+        $user = $this->getDoctrine()->getRepository('RestBundle:User')->getUserByLogin($login);
+        $user = $user[0];
+        $userVisit->setUser($user);
         $userVisit->setVisitDate();
         $em->persist($userVisit);
         $em->flush();

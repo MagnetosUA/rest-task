@@ -10,4 +10,13 @@ namespace RestBundle\Repository;
  */
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getUserByLogin($login)
+    {
+        $query = $this->createQueryBuilder('u')
+            ->where('u.login = :login')
+            ->setParameter('login', $login)
+            ->getQuery();
+
+        return $query->getResult();
+    }
 }

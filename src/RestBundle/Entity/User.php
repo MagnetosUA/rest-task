@@ -2,6 +2,7 @@
 
 namespace RestBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -35,6 +36,16 @@ class User
      */
     private $name;
 
+    /**
+     * One User has Many Visits.
+     * @ORM\OneToMany(targetEntity="UserVisit", mappedBy="user")
+     */
+    private $visits;
+
+    public function __construct()
+    {
+        $this->visits = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -93,5 +104,23 @@ class User
     {
         return $this->name;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getVisits()
+    {
+        return $this->visits;
+    }
+
+    /**
+     * @param mixed $visits
+     */
+    public function setVisits($visits)
+    {
+        $this->visits = $visits;
+    }
+
+
 }
 

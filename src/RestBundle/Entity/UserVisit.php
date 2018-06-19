@@ -22,14 +22,10 @@ class UserVisit
     private $id;
 
     /**
-     * @var int
      *
-     * @ORM\Column(name="userId", type="integer")
-     *
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="visits")
      */
-    private $userId;
+    private $user;
 
     /**
      *
@@ -49,27 +45,20 @@ class UserVisit
     }
 
     /**
-     * Set userId
-     *
-     * @param integer $userId
-     *
-     * @return UserVisit
+     * @return mixed
      */
-    public function setUserId($userId)
+    public function getUser()
     {
-        $this->userId = $userId;
-
-        return $this;
+        return $this->user;
     }
 
     /**
-     * Get userId
-     *
-     * @return int
+     * @param mixed $user
      */
-    public function getUserId()
+    public function setUser($user)
     {
-        return $this->userId;
+        $this->user = $user;
+        return $this;
     }
 
     /**
