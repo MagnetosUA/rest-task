@@ -37,17 +37,6 @@ class User
     private $name;
 
     /**
-     * One User has Many Visits.
-     * @ORM\OneToMany(targetEntity="UserVisit", mappedBy="user")
-     */
-    private $visits;
-
-    public function __construct()
-    {
-        $this->visits = new ArrayCollection();
-    }
-
-    /**
      * Get id
      *
      * @return int
@@ -104,23 +93,5 @@ class User
     {
         return $this->name;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getVisits()
-    {
-        return $this->visits;
-    }
-
-    /**
-     * @param mixed $visits
-     */
-    public function setVisits($visits)
-    {
-        $this->visits = $visits;
-    }
-
-
 }
 

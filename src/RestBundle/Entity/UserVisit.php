@@ -23,7 +23,8 @@ class UserVisit
 
     /**
      *
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="visits")
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     private $user;
 
@@ -58,8 +59,8 @@ class UserVisit
     public function setUser($user)
     {
         $this->user = $user;
-        return $this;
     }
+
 
     /**
      * Set visitDate
