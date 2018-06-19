@@ -179,35 +179,40 @@ class UserController extends FOSRestController
     }
 
     /**
-     * @ApiDoc(
-     *  description="Get unique users by date interval",
      *
-     * requirements={
-     *      {"name"="from", "dataType"="date", "required"=true, "description"="visit data from"},
-     *      {"name"="to", "dataType"="date", "required"=true, "description"="visit data to"},
-     *  },
-     * statusCodes={
-     *         404="Returned when user is not found",
-     *     }
-     * )
      *
-     * @Rest\Get("/users/{from}/{to}")
+     * @Rest\Get("/unique-users/{from}/{to}")
      */
-    public function getUniqueUserByDate($from, $to)
+    public function getUniqueUserByDateInterval($from, $to)
     {
-        $dateInterval["from"] = $from;
-        $dateInterval["to"] = $to;
-        $users = $this->getDoctrine()->getRepository('RestBundle:UserVisit')->getUniqueUsersByDateInterval($dateInterval);
-        if ($users === null) {
+        $userVisits = $this->getDoctrine()->getRepository('RestBundle:UserVisit')->getUsersByDateInterval($from, $to);
+
+        if ($userVisits === null) {
             return new View("there are no users exist", Response::HTTP_NOT_FOUND);
         }
-        $usersId = [];
-        foreach ($users as $user) {
-            $usersId[] = $user->getUserId();
-        }
-        $uniqueUsers = array_unique($usersId);
 
-        return $uniqueUsers;
+        foreach ($userVisits as $userVisit) {
+            $date = $userVisit->getVisitDate();
+            $date = $date->format('Y-m-d');
+            $dates[] = $date;
+        }
+        $uniqueDates = array_unique($dates);
+
+        foreach ($uniqueDates as $uniqueDate) {
+            foreach ($userVisits as $userVisit) {
+                $date = $userVisit->getVisitDate();
+                $date = $date->format('Y-m-d');
+                if ($date == $uniqueDate) {
+                    $allUsers["$date"][] = $userVisit->getUser()->getId();
+                }
+            }
+        }
+
+        foreach ($allUsers as $kay => $value) {
+            $results["$kay"] = count(array_unique($value));
+        }
+        return $results;
     }
+
 }
 
