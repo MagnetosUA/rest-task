@@ -6,6 +6,7 @@ use function PHPSTORM_META\type;
 use RestBundle\Entity\UserVisit;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
+use RestBundle\Form\Type\UserType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\View\View;
@@ -56,20 +57,18 @@ class UserController extends FOSRestController
      */
     public function postAction(Request $request)
     {
-        $data = new User;
-        $name = $request->get('name');
-        $login = $request->get('login');
-        if(empty($name) || empty($login))
-        {
-            return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE);
-        }
-        $data->setName($name);
-        $data->setLogin($login);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($data);
-        $em->flush();
+        $data = json_decode($request->getContent(), true);
+        $form = $this->createForm(UserType::class);
+        $form->submit($data);
 
-        return new View("User Added Successfully", Response::HTTP_OK);
+        echo $form->getErrors();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+            return $user;
+        }
     }
 
     /**
@@ -90,6 +89,26 @@ class UserController extends FOSRestController
      */
     public function updateAction($id, Request $request)
     {
+        $user = $this->getDoctrine()->getRepository('RestBundle:User')->find($id);
+        $form = $this->createForm(UserType::class, $user);
+
+        $data = $request->getContent();
+        $data = json_decode($data);
+
+        $login = $data->login;
+        $name = $data->name;
+        $em = $this->getDoctrine()->getManager();
+        $user->setName($name);
+        $user->setLogin($login);
+        $em->flush();
+
+        $form->setData($user);
+
+        $form->handleRequest($request);
+        $fd = $form->getData();
+        var_dump($fd);
+        exit;
+
         $data = $request->getContent();
         $data = json_decode($data);
         $login = $data->login;
@@ -103,7 +122,7 @@ class UserController extends FOSRestController
             $user->setName($name);
             $user->setLogin($login);
             $em->flush();
-            return new View("User Updated Successfully", Response::HTTP_OK);
+            return $user;
         }
         elseif(empty($name) && !empty($login)){
             $user->setLogin($login);
@@ -145,7 +164,7 @@ class UserController extends FOSRestController
             $em->flush();
         }
 
-        return new View("deleted successfully", Response::HTTP_OK);
+        return new View("deleted successfully", Response::HTTP_NO_CONTENT);
     }
 
     /**
@@ -166,7 +185,6 @@ class UserController extends FOSRestController
     {
         $userVisit = new UserVisit();
         $em = $this->getDoctrine()->getManager();
-
         $login = $request->get('login');
         $user = $this->getDoctrine()->getRepository('RestBundle:User')->getUserByLogin($login);
         $user = $user[0];
