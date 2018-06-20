@@ -9,9 +9,7 @@ use RestBundle\Form\Type\UserType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\View\View;
-use RestBundle\Entity\User;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
-
 
 class UserController extends FOSRestController
 {
@@ -20,10 +18,7 @@ class UserController extends FOSRestController
      *
      * @ApiDoc(
      *  description="Get users",
-     *  parameters={
-     *      {"name"="name", "dataType"="string", "format" = "json", "required"=true, "description"="user name"},
-     *      {"name"="login", "dataType"="string", "format" = "json", "required"=true, "description"="user login"},
-     *  },
+     *
      * statusCodes={
      *         200="Returned when successful",
      *         404="Returned when the users is not found"
@@ -59,13 +54,14 @@ class UserController extends FOSRestController
         $data = json_decode($request->getContent(), true);
         $form = $this->createForm(UserType::class);
         $form->submit($data);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
             return $user;
+        } else {
+            return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE);
         }
     }
 
@@ -102,6 +98,8 @@ class UserController extends FOSRestController
             $em->persist($user);
             $em->flush();
             return $user;
+        } else {
+            return new View("User name or login cannot be empty", Response::HTTP_NOT_ACCEPTABLE);
         }
     }
 
@@ -113,7 +111,7 @@ class UserController extends FOSRestController
      *      {"name"="id", "dataType"="integer", "required"=true, "description"="user id"},
      *  },
      * statusCodes={
-     *         200="Returned when user deleted successfully",
+     *         204="Returned when user deleted successfully",
      *         404="Returned when user is not found"
      *     }
      * )
@@ -131,7 +129,6 @@ class UserController extends FOSRestController
             $em->remove($user);
             $em->flush();
         }
-
         return new View("deleted successfully", Response::HTTP_NO_CONTENT);
     }
 
@@ -139,7 +136,7 @@ class UserController extends FOSRestController
      * @ApiDoc(
      *  description="Register User's visiting",
      *  parameters={
-     *      {"name"="id", "dataType"="integer", "required"=true, "description"="user id"},
+     *      {"name"="userId", "dataType"="integer", "required"=true, "description"="user id"},
      *      {"name"="date", "dataType"="date", "required"=true, "description"="visit data"},
      *  },
      * statusCodes={
@@ -165,7 +162,17 @@ class UserController extends FOSRestController
     }
 
     /**
+     * @ApiDoc(
+     *  description="Get unique users by date interval",
      *
+     * requirements={
+     *      {"name"="from", "dataType"="date", "required"=true, "description"="visit data from"},
+     *      {"name"="to", "dataType"="date", "required"=true, "description"="visit data to"},
+     *  },
+     * statusCodes={
+     *         404="Returned when user is not found",
+     *     }
+     * )
      *
      * @Rest\Get("/unique-users/{from}/{to}")
      */
@@ -197,7 +204,11 @@ class UserController extends FOSRestController
         foreach ($allUsers as $kay => $value) {
             $results["$kay"] = count(array_unique($value));
         }
-        return $results;
+        if (empty($results)) {
+            return new View("users is not found", Response::HTTP_NOT_FOUND);
+        } else {
+            return $results;
+        }
     }
 
 }
