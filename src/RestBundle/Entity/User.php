@@ -3,6 +3,7 @@
 namespace RestBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints;
 
 /**
  * User
@@ -24,14 +25,14 @@ class User
 
     /**
      * @var string
-     *
+     * @Constraints\NotBlank())
      * @ORM\Column(name="login", type="string", length=50, unique=true)
      */
     private $login;
 
     /**
      * @var string
-     *
+     * @Constraints\NotBlank())
      * @ORM\Column(name="name", type="string", length=250)
      */
     private $name;

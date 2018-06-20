@@ -2,7 +2,6 @@
 
 namespace RestBundle\Controller;
 
-use function PHPSTORM_META\type;
 use RestBundle\Entity\UserVisit;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
